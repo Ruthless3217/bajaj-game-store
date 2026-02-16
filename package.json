@@ -20,8 +20,11 @@
     "test": "pnpm -r run test"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
-    "fs-extra": "^11.2.0",
-    "concurrently": "^8.2.2"
+    "fs-extra": "^11.2.0"
+  },
+  "dependencies": {
+    "pnpm": "^10.29.3"
   }
 }

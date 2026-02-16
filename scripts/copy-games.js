@@ -17,7 +17,7 @@ const games = [
   },
   {
     name: 'life-goals',
-    source: path.join(ROOT_DIR, 'game12', 'dist'),
+    source: path.join(ROOT_DIR, 'life-goals', 'dist'),
     destination: path.join(SHELL_GAMES_DIR, 'life-goals')
   },
   {
@@ -29,12 +29,12 @@ const games = [
 
 games.forEach(game => {
   console.log(`  ✓ Copying ${game.name}...`);
-  
+
   // Remove existing if present
   if (fs.existsSync(game.destination)) {
     fs.removeSync(game.destination);
   }
-  
+
   // Copy game build
   if (fs.existsSync(game.source)) {
     fs.copySync(game.source, game.destination);
