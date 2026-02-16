@@ -1,27 +1,36 @@
 {
   "name": "life-goals",
-  "version": "1.0.0",
   "private": true,
-  "description": "Master Micro-Frontend Shell - Monolithic Build",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "install:all": "pnpm install -r",
-    "dev": "pnpm --filter angular-shell dev:serve & pnpm --filter scramble-words dev & pnpm --filter life-goals dev & pnpm --filter quiz-game dev",
-    "dev:shell": "pnpm --filter angular-shell dev:serve",
-    "dev:games": "pnpm --filter scramble-words dev & pnpm --filter life-goals dev & pnpm --filter quiz-game dev",
-    "build": "pnpm run build:games && pnpm run build:shell",
-    "build:games": "pnpm --filter scramble-words build && pnpm --filter life-goals build && pnpm --filter quiz-game build && pnpm run copy:games",
-    "build:shell": "pnpm --filter angular-shell build",
-    "copy:games": "node scripts/copy-games.js",
-    "serve": "pnpm --filter angular-shell serve",
-    "serve:prod": "pnpm --filter angular-shell serve:prod",
-    "preview": "pnpm --filter angular-shell preview",
-    "clean": "pnpm -r exec rm -rf dist node_modules",
-    "lint": "pnpm -r run lint",
-    "test": "pnpm -r run test"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "fs-extra": "^11.2.0",
-    "concurrently": "^8.2.2"
+    "@vitejs/plugin-react": "^5.1.4",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-select": "^1.2.4",
+    "@radix-ui/react-slot": "^1.2.4",
+    "canvas-confetti": "^1.9.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.30.0",
+    "gsap": "^3.14.2",
+    "lucide-react": "^0.563.0",
+    "prop-types": "^15.8.1",
+    "react": "^19.2.4",
+    "react-confetti": "^6.4.0",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.5.0",
+    "tailwind-merge": "^3.4.0"
   }
 }
