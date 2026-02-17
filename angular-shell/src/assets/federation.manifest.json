@@ -36,5 +36,13 @@
       "/assets/games/quiz-game/assets/bg.png",
       "/assets/games/quiz-game/assets/gst.png"
     ]
+  },
+  "life-milestone-race": {
+    "remoteEntry": "/assets/games/life-milestone-race/index.js",
+    "exposedModule": "./GameEntry",
+    "type": "react",
+    "displayName": "Life Milestone Race",
+    "popular": true,
+    "assets": []
   }
 }

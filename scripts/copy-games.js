@@ -24,6 +24,11 @@ const games = [
     name: 'quiz-game',
     source: path.join(ROOT_DIR, 'quiz-game', 'dist'),
     destination: path.join(SHELL_GAMES_DIR, 'quiz-game')
+  },
+  {
+    name: 'life-milestone-race',
+    source: path.join(ROOT_DIR, 'life-milestone-race', 'dist'),
+    destination: path.join(SHELL_GAMES_DIR, 'life-milestone-race')
   }
 ];
 
@@ -86,6 +91,14 @@ const manifest = {
       "/assets/games/quiz-game/assets/bg.png",
       "/assets/games/quiz-game/assets/gst.png"
     ]
+  },
+  "life-milestone-race": {
+    "remoteEntry": "/assets/games/life-milestone-race/index.js",
+    "exposedModule": "./GameEntry",
+    "type": "react",
+    "displayName": "Life Milestone Race",
+    "popular": true,
+    "assets": []
   }
 };
 
