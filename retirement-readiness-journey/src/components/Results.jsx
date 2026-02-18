@@ -1,196 +1,236 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, AnimatePresence, animate } from 'framer-motion';
 import { Button } from './ui/Button';
+import { Share2, Phone, Calendar, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { READINESS_BANDS } from '../constants/journeySteps';
-import { cn } from '../utils/cn';
+import BookingModal from './BookingModal';
 
-const Results = ({ score, selections, onReset, insights, scoreBreakdown }) => {
-    const [formState, setFormState] = useState({ name: '', mobile: '', date: '', time: '' });
+const Results = ({ score, onReset, userInfo }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [displayScore, setDisplayScore] = useState(0);
 
-    // Counting animation for the score
-    const count = useMotionValue(0);
-    const roundedCount = useTransform(count, (latest) => Math.round(latest));
-    const [displayCount, setDisplayCount] = useState(0);
-
+    // Counting animation for the score number
     useEffect(() => {
-        const animation = animate(count, score, {
+        const controls = animate(0, score, {
             duration: 1.5,
-            delay: 0.5,
             ease: "easeOut",
-            onUpdate: (latest) => setDisplayCount(Math.round(latest))
+            onUpdate: (latest) => setDisplayScore(Math.round(latest))
         });
+        return controls.stop;
+    }, [score]);
 
-        return animation.stop;
-    }, [score, count]);
+    const handleBookingSubmit = () => {
+        setIsSubmitted(true);
+    };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: 'My Retirement Readiness Score',
+            text: `I scored ${score}/100 on the Retirement Readiness Journey! Can you beat my score?`,
+            url: window.location.href
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(`${shareData.text} Check it out here: ${shareData.url}`);
+                alert('Result copied to clipboard!');
+            }
+        } catch (err) {
+            console.error('Error sharing:', err);
+        }
+    };
 
     const band = READINESS_BANDS.find(b => score >= b.min) || READINESS_BANDS[READINESS_BANDS.length - 1];
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormState(prev => ({ ...prev, [name]: value }));
-    };
+    // Thank You Screen View (Refined background and animation)
+    if (isSubmitted) {
+        return (
+            <div className="flex flex-col items-center justify-center space-y-8 py-12 text-center animate-in fade-in duration-700">
+                <div className="relative">
+                    {/* Blinking/Pulsing Shadow */}
+                    <motion.div
+                        animate={{
+                            scale: [1, 1.6, 1],
+                            opacity: [0, 0.6, 0]
+                        }}
+                        transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="absolute inset-0 bg-[#ff6600] rounded-full blur-3xl"
+                    />
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Lead Captured:", {
-            ...formState,
-            score,
-            ...scoreBreakdown,
-            timestamp: new Date().toISOString()
-        });
-        setTimeout(() => setIsSubmitted(true), 1000);
-    };
-
-    return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            {/* Score Section */}
-            <div className="text-center space-y-6 bg-primary-500 rounded-[2rem] p-10 text-white shadow-2xl shadow-primary-500/30">
-                <p className="text-[0.875rem] font-bold tracking-[0.2em] uppercase opacity-80">Your Preparedness Score</p>
-
-                <div className="relative inline-flex flex-col items-center justify-center">
-                    <svg className="w-[12rem] h-[12rem] -rotate-90">
-                        <circle
-                            cx="96" cy="96" r="88"
-                            fill="transparent"
-                            stroke="rgba(255,255,255,0.2)"
-                            strokeWidth="12"
-                        />
-                        <motion.circle
-                            cx="96" cy="96" r="88"
-                            fill="transparent"
-                            stroke="#ffffff"
-                            strokeWidth="12"
-                            strokeDasharray="552.9"
-                            initial={{ strokeDashoffset: 552.9 }}
-                            animate={{ strokeDashoffset: 552.9 * (1 - score / 100) }}
-                            transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                            strokeLinecap="round"
-                        />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.span
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 1, duration: 0.5 }}
-                            className="text-[4rem] font-black leading-none"
-                        >
-                            {displayCount}
-                        </motion.span>
-                        <span className="text-[1rem] font-bold opacity-70">/ 100</span>
+                    <div className="w-32 h-32 bg-[#ff6600] rounded-full flex items-center justify-center relative z-10 shadow-2xl shadow-[#ff6600]/50">
+                        <CheckCircle2 className="w-16 h-16 text-white" strokeWidth={3} />
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <h2 className="text-[2rem] font-black tracking-tight flex items-center justify-center gap-2">
-                        {band.icon} <span style={{ color: band.color }}>{band.label.toUpperCase()}</span>
+                <div className="space-y-4 max-w-[320px]">
+                    <h1 className="text-slate-900 text-3xl font-black leading-tight uppercase tracking-tight">
+                        THANK YOU<br />
+                        <span className="text-primary-500 truncate block max-w-full">{userInfo?.name || 'USER'}</span><br />
+                        FOR<br />
+                        SHARING YOUR<br />
+                        DETAILS
+                    </h1>
+                    <p className="text-slate-500 font-bold text-sm tracking-wide uppercase">
+                        OUR RELATIONSHIP MANAGER<br />
+                        WILL REACH OUT TO YOU
+                    </p>
+                </div>
+
+                <button
+                    onClick={onReset}
+                    className="w-full max-w-[280px] h-[4.5rem] bg-[#ff6600] hover:bg-[#ff7711] text-white font-black rounded-2xl shadow-[0_6px_0_#993d00] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 text-xl uppercase tracking-wider"
+                >
+                    <RotateCcw className="w-6 h-6" />
+                    RETAKE
+                </button>
+
+                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] pt-4">
+                    BAJAJ LIFE INSURANCE
+                </p>
+            </div>
+        );
+    }
+
+    // Results Screen View
+    return (
+        <div className="max-w-[480px] mx-auto w-full flex flex-col space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-12 h-auto 
+            [/* Mobile-only one-screen constraint */] 
+            max-[640px]:h-[100dvh] max-[640px]:overflow-hidden max-[640px]:p-2 max-[640px]:space-y-4">
+
+            {/* Score Card Section */}
+            <div className="text-center space-y-4 sm:space-y-6 bg-[#3b82f6] rounded-[2rem] p-6 sm:p-10 text-white shadow-2xl shadow-blue-500/20 relative flex-shrink-0
+                max-[640px]:p-4 max-[640px]:space-y-2 max-[640px]:rounded-[1.5rem]">
+
+                {/* Centered Greeting Header */}
+                <div className="flex justify-center items-center relative pt-2 max-[640px]:pt-1">
+                    <h2 className="text-white text-base font-black uppercase tracking-widest text-center truncate px-10 max-[640px]:text-[0.75rem]">
+                        HI {userInfo?.name?.toUpperCase() || 'THERE'}
                     </h2>
-                    <p className="text-[1.125rem] opacity-90 max-w-[24rem] mx-auto font-medium">
+                    <button
+                        onClick={handleShare}
+                        className="absolute right-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-white/70 hover:bg-white/30 transition-colors max-[640px]:w-8 max-[640px]:h-8"
+                    >
+                        <Share2 className="w-5 h-5 max-[640px]:w-4 max-[640px]:h-4" />
+                    </button>
+                </div>
+
+                {/* SVG Circle Meter */}
+                <div className="flex justify-center py-2 max-[640px]:py-0 max-[640px]:scale-90">
+                    <div className="relative inline-flex flex-col items-center justify-center">
+                        <svg className="w-[12rem] h-[12rem] -rotate-90">
+                            <circle
+                                cx="96" cy="96" r="88"
+                                fill="transparent"
+                                stroke="rgba(255,255,255,0.2)"
+                                strokeWidth="12"
+                                className="transition-all duration-300"
+                            />
+                            <motion.circle
+                                cx="96" cy="96" r="88"
+                                fill="transparent"
+                                stroke="#ff6600"
+                                strokeWidth="12"
+                                strokeDasharray="552.9"
+                                initial={{ strokeDashoffset: 552.9 }}
+                                animate={{ strokeDashoffset: 552.9 * (1 - score / 100) }}
+                                transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                                strokeLinecap="round"
+                            />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <p className="text-[0.75rem] font-black uppercase tracking-[0.2em] opacity-70 mb-1 max-[640px]:text-[0.6rem]">YOUR SCORE</p>
+                            <div className="flex flex-col items-center justify-center">
+                                <span className="text-[3.5rem] font-black leading-none max-[640px]:text-[2.5rem]">
+                                    {displayScore}
+                                </span>
+                                <span className="text-[1.25rem] font-bold opacity-60 max-[640px]:text-[1rem]">/ 100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Large Band Text with Emoji */}
+                <div className="space-y-4 max-[640px]:space-y-1">
+                    <div className="flex items-center justify-center gap-3">
+                        <span className="text-[2.5rem] sm:text-[3.5rem] drop-shadow-md">{band.icon}</span>
+                        <h2 className="text-[3rem] sm:text-[4rem] font-black tracking-tight text-[#ff6600] uppercase italic drop-shadow-lg leading-none">
+                            {band.label}
+                        </h2>
+                    </div>
+                    <p className="text-[1.125rem] font-bold leading-tight max-w-[22rem] mx-auto text-white drop-shadow-sm max-[640px]:text-[0.875rem]">
                         {band.description}
                     </p>
                 </div>
             </div>
 
-            {/* Insights */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {insights.map((insight, idx) => (
-                    <div key={idx} className="bg-white border-2 border-slate-50 p-6 rounded-[1.25rem] shadow-sm flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                            <span className="text-[1.25rem]">{insight.label.split(' ')[0]}</span>
-                            <span className="text-[0.75rem] font-bold text-primary-500 uppercase tracking-wider">
-                                {insight.label.split(' ').slice(1).join(' ')}
-                            </span>
-                        </div>
-                        <p className="text-[0.9375rem] font-semibold text-slate-700 leading-snug">{insight.text}</p>
-                    </div>
-                ))}
-            </div>
+            {/* Large Share Button */}
+            <button
+                onClick={handleShare}
+                className="w-full h-[4.5rem] bg-[#ff6600] hover:bg-[#ff7711] text-white font-black rounded-2xl shadow-[0_6px_0_#993d00] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 text-xl uppercase tracking-wider flex-shrink-0
+                    max-[640px]:h-[3.5rem] max-[640px]:rounded-xl max-[640px]:text-lg max-[640px]:shadow-[0_4px_0_#993d00]"
+            >
+                <Share2 className="w-6 h-6 max-[640px]:w-5 max-[640px]:h-5" />
+                SHARE
+            </button>
 
-            {/* Conversion Section */}
-            <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 overflow-hidden relative">
-                <div className="relative z-10 space-y-8">
-                    <div className="text-center space-y-2">
-                        <h3 className="text-[1.5rem] font-bold text-slate-900">Expert Guidance awaits you</h3>
-                        <p className="text-slate-500">To improve your retirement readiness score, connect with our advisor for personalized planning.</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <Button className="w-full h-[4rem] bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[1.125rem] font-bold shadow-lg shadow-orange-500/30">
-                            📞 CALL NOW
-                        </Button>
-
-                        <div className="flex items-center gap-4 text-slate-300">
-                            <div className="flex-1 h-px bg-current" />
-                            <span className="text-[0.75rem] font-bold uppercase tracking-widest">or book a slot</span>
-                            <div className="flex-1 h-px bg-current" />
-                        </div>
-
-                        {!isSubmitted ? (
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <input
-                                        required
-                                        name="name"
-                                        placeholder="Full Name *"
-                                        className="h-[3.5rem] bg-white border-2 border-slate-100 rounded-[0.75rem] px-4 focus:border-primary-500 outline-none transition-all"
-                                        onChange={handleInputChange}
-                                    />
-                                    <input
-                                        required
-                                        name="mobile"
-                                        type="tel"
-                                        pattern="[0-9]{10}"
-                                        placeholder="Mobile Number (10 digits) *"
-                                        className="h-[3.5rem] bg-white border-2 border-slate-100 rounded-[0.75rem] px-4 focus:border-primary-500 outline-none transition-all"
-                                        onChange={handleInputChange}
-                                    />
-                                    <input
-                                        required
-                                        type="date"
-                                        name="date"
-                                        min={new Date().toISOString().split('T')[0]}
-                                        className="h-[3.5rem] bg-white border-2 border-slate-100 rounded-[0.75rem] px-4 focus:border-primary-500 outline-none transition-all"
-                                        onChange={handleInputChange}
-                                    />
-                                    <select
-                                        required
-                                        name="time"
-                                        className="h-[3.5rem] bg-white border-2 border-slate-100 rounded-[0.75rem] px-4 focus:border-primary-500 outline-none transition-all appearance-none"
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Preferred Time *</option>
-                                        <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                                        <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
-                                        <option value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
-                                        <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
-                                        <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
-                                        <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
-                                    </select>
-                                </div>
-                                <Button type="submit" className="w-full h-[3.5rem] bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold">
-                                    BOOK A SLOT
-                                </Button>
-                            </form>
-                        ) : (
-                            <div className="text-center py-8 space-y-2 bg-emerald-50 rounded-[1rem] border border-emerald-100">
-                                <div className="text-[2rem]">✅</div>
-                                <h4 className="text-emerald-800 font-bold">Slot Booked Successfully!</h4>
-                                <p className="text-emerald-600/80 text-[0.875rem]">Thank you {formState.name}! Our Bajaj Life advisor will contact you shortly.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <button
-                        onClick={onReset}
-                        className="w-full text-slate-400 text-[0.875rem] font-bold uppercase tracking-widest hover:text-primary-500 transition-colors"
-                    >
-                        Retake Assessment
-                    </button>
+            {/* Conversion Section Card */}
+            <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 space-y-6 flex-shrink-0
+                max-[640px]:p-4 max-[640px]:rounded-[1.5rem] max-[640px]:space-y-3">
+                <div className="text-center">
+                    <p className="text-slate-700 font-bold text-sm leading-relaxed max-[640px]:text-[0.75rem] max-[640px]:px-2">
+                        To Know more about insurance and savings products! Connect with our Relationship Manager to get started.
+                    </p>
                 </div>
+
+                <div className="space-y-4 max-[640px]:space-y-2">
+                    <Button
+                        onClick={() => window.location.href = "tel:18002099999"}
+                        className="w-full h-[3.5rem] sm:h-[4rem] bg-[#ff6600] hover:bg-[#ff7711] text-white font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2 sm:gap-3 rounded-xl shadow-lg shadow-orange-500/20"
+                    >
+                        <Phone className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                        CALL NOW
+                    </Button>
+
+                    <div className="flex items-center gap-4 py-1 max-[640px]:py-0">
+                        <div className="flex-1 h-px bg-slate-200" />
+                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">OR</span>
+                        <div className="flex-1 h-px bg-slate-200" />
+                    </div>
+
+                    <Button
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-full h-[3.5rem] sm:h-[4rem] bg-[#0066B2] hover:bg-[#005596] text-white font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2 sm:gap-3 rounded-xl shadow-lg shadow-blue-500/20"
+                    >
+                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+                        BOOK A CONVENIENT SLOT
+                    </Button>
+                </div>
+
+                <button
+                    onClick={onReset}
+                    className="w-full flex items-center justify-center gap-2 text-slate-400 text-[0.75rem] font-bold uppercase tracking-widest hover:text-blue-500 transition-colors pt-4 max-[640px]:pt-2 max-[640px]:text-[0.65rem]"
+                >
+                    <RotateCcw className="w-4 h-4" />
+                    RETAKE ASSESSMENT
+                </button>
             </div>
+
+            <BookingModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleBookingSubmit}
+                initialName={userInfo?.name}
+                initialMobile={userInfo?.mobile}
+            />
         </div>
     );
 };
-
 
 export default Results;

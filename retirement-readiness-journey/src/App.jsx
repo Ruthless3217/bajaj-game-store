@@ -15,12 +15,12 @@ const StepSurprises = lazy(() => import('./components/StepSurprises'));
 const Results = lazy(() => import('./components/Results'));
 
 const App = () => {
-    const { currentStep, currentStepIndex, totalSteps, actions, selections, score, insights, scoreBreakdown } = useRetirementJourney();
+    const { currentStep, currentStepIndex, totalSteps, actions, selections, score, insights, scoreBreakdown, userInfo } = useRetirementJourney();
 
     const renderStep = () => {
         switch (currentStep.id) {
             case JOURNEY_STEPS.INTRO:
-                return <Intro onStart={actions.goToNextStep} />;
+                return <Intro onStart={actions.goToNextStep} setUserInfo={actions.setUserInfo} userInfo={userInfo} />;
             case JOURNEY_STEPS.SCENARIO:
                 return <StepScenario step={currentStep} selections={selections} onSelect={actions.handleSelection} />;
             case JOURNEY_STEPS.LIFESTYLE:
@@ -32,7 +32,7 @@ const App = () => {
             case JOURNEY_STEPS.SURPRISES:
                 return <StepSurprises step={currentStep} selections={selections} onSelect={actions.handleSelection} />;
             case JOURNEY_STEPS.RESULTS:
-                return <Results score={score} selections={selections} onReset={actions.reset} insights={insights} scoreBreakdown={scoreBreakdown} />;
+                return <Results score={score} selections={selections} onReset={actions.reset} insights={insights} scoreBreakdown={scoreBreakdown} userInfo={userInfo} />;
             default:
                 return null;
         }
@@ -63,7 +63,7 @@ const App = () => {
             )}
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col max-w-[48rem] mx-auto w-full px-6 py-12">
+            <main className={`flex-1 flex flex-col max-w-[48rem] mx-auto w-full px-6 ${isResults ? 'pt-[3.4rem] pb-0' : 'py-12'}`}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep.id}
@@ -113,5 +113,7 @@ const App = () => {
         </div>
     );
 };
+
+
 
 export default App;

@@ -4,7 +4,9 @@ import { JOURNEY_STEPS, STEPS_DATA } from '../constants/journeySteps';
 export const useRetirementJourney = () => {
     const [currentStepIndex, setCurrentStepIndex] = useState(-1); // -1 for Intro
     const [selections, setSelections] = useState({});
+    const [userInfo, setUserInfo] = useState({ name: '', mobile: '', termsAccepted: false });
     const [isFinished, setIsFinished] = useState(false);
+
 
     const currentStep = useMemo(() => {
         if (currentStepIndex === -1) return { id: JOURNEY_STEPS.INTRO };
@@ -145,16 +147,20 @@ export const useRetirementJourney = () => {
         scoreBreakdown: scoreData,
         insights,
         isFinished,
+        userInfo,
         actions: {
             goToNextStep,
             goToPrevStep,
             handleSelection,
+            setUserInfo,
             reset: () => {
                 setCurrentStepIndex(-1);
                 setSelections({});
+                setUserInfo({ name: '', mobile: '', termsAccepted: false });
                 setIsFinished(false);
             }
         }
+
     };
 };
 
