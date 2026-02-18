@@ -62,6 +62,7 @@ export function useRaceEngine() {
     const [timeline, setTimeline] = useState([]);
     const [lastFeedback, setLastFeedback] = useState(null);
     const [isTimerActive, setIsTimerActive] = useState(false);
+    const [userName, setUserName] = useState('');
 
     const consecutiveExposedHighRef = useRef(0);
 
@@ -108,6 +109,7 @@ export function useRaceEngine() {
         setScore(INITIAL_SCORE);
         setTimeline([]);
         setLastFeedback(null);
+        setUserName('');
         consecutiveExposedHighRef.current = 0;
         setPhase(GAME_PHASES.RACING);
         setIsTimerActive(true);
@@ -193,6 +195,11 @@ export function useRaceEngine() {
         setPhase(GAME_PHASES.LEAD_FORM);
     }, []);
 
+    const showThankYou = useCallback((name) => {
+        if (name) setUserName(name);
+        setPhase(GAME_PHASES.THANK_YOU);
+    }, []);
+
     const restartGame = useCallback(() => {
         setGameId('');
         setPhase(GAME_PHASES.INTRO);
@@ -203,6 +210,7 @@ export function useRaceEngine() {
         setTimeline([]);
         setLastFeedback(null);
         setIsTimerActive(false);
+        setUserName('');
         consecutiveExposedHighRef.current = 0;
     }, []);
 
@@ -223,6 +231,7 @@ export function useRaceEngine() {
         finalScore,
         riskGaps,
         progressPercent,
+        userName,
 
         // Actions
         startGame,
@@ -234,6 +243,7 @@ export function useRaceEngine() {
         showTimeline,
         showConversion,
         showLeadForm,
+        showThankYou,
         restartGame,
     };
 }

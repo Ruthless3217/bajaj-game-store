@@ -86,4 +86,5 @@ export const GAME_PHASES = {
     TIMELINE: 'timeline',
     CONVERSION: 'conversion',
     LEAD_FORM: 'lead_form',
+    THANK_YOU: 'thank_you',
 };

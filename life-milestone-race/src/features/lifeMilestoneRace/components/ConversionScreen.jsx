@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Share2, Phone, CalendarClock } from 'lucide-react';
 import Button from '../../../components/ui/Button';
-import Card from '../../../components/ui/Card';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -26,108 +25,109 @@ const ConversionScreen = memo(function ConversionScreen({
     category,
     onBookSlot,
 }) {
-    const handleShare = () => {
-        const shareText = `I scored ${score}/100 (${category?.label}) on the Life Milestone Race! How protected are you? 🏁`;
+    const handleShare = async () => {
+        const shareText = `I scored ${score}/100 (${category?.label}) on the Life Milestone Race! Check your Life Goals readiness and discover how prepared you are for your future. ${window.location.href}`;
+        const shareData = {
+            title: 'My Life Protection Score',
+            text: shareText,
+            url: window.location.href
+        };
 
         if (navigator.share) {
-            navigator.share({
-                title: 'Life Milestone Race',
-                text: shareText,
-                url: window.location.href,
-            }).catch(() => {
-                // User cancelled or share failed — no-op
-            });
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
         } else {
-            navigator.clipboard?.writeText(shareText);
+            navigator.clipboard.writeText(shareText);
+            alert("Result copied to clipboard!");
         }
     };
 
     const handleCall = () => {
-        window.location.href = 'tel:+911800209888';
+        window.location.href = 'tel:18002099999';
     };
 
     return (
         <motion.div
-            className="w-full flex flex-col items-center gap-6"
+            className="w-full flex flex-col items-center gap-8"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
             {/* Header */}
-            <motion.div variants={itemVariants} className="text-center space-y-2">
-                <h2 className="race-subheading text-[1.5rem] text-white">
+            <motion.div variants={itemVariants} className="text-center space-y-3">
+                <h2 className="race-heading text-[1.75rem] text-white">
                     Strengthen Your Protection
                 </h2>
-                <p className="text-race-muted text-[0.875rem] max-w-xs mx-auto">
-                    Your score: <span className="font-bold text-white">{score}/100</span>{' '}
-                    <span style={{ color: category?.color }}>({category?.label})</span>
+                <div className="flex flex-col items-center">
+                    <span
+                        className="text-[0.75rem] font-black uppercase tracking-[0.2em] text-white/40 mb-1"
+                    >
+                        Your Score
+                    </span>
+                    <span
+                        className="text-[2.5rem] font-black"
+                        style={{ color: category?.color || '#3B82F6', textShadow: `0 0 20px ${category?.color}40` }}
+                    >
+                        {score}/100
+                    </span>
+                </div>
+            </motion.div>
+
+            {/* Decorative Info Box */}
+            <motion.div
+                variants={itemVariants}
+                className="w-full bg-bajaj-blue/10 border border-bajaj-blue/30 rounded-2xl p-5 backdrop-blur-md relative overflow-hidden group"
+            >
+                <div className="absolute top-0 left-0 w-1 h-full bg-bajaj-blue" />
+                <p className="text-[1rem] text-white/90 leading-relaxed font-medium">
+                    &ldquo;To know more about insurance and savings products, please connect with our relationship manager.&rdquo;
                 </p>
+                <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <CalendarClock size={100} />
+                </div>
             </motion.div>
 
-            {/* Supportive message */}
-            <motion.div variants={itemVariants}>
-                <Card padding="md" className="text-center">
-                    <p className="text-[0.9375rem] text-slate-300 leading-relaxed">
-                        &ldquo;Life moves faster than planning.<br />
-                        Let&apos;s strengthen your protection together.&rdquo;
-                    </p>
-                </Card>
-            </motion.div>
-
-            {/* CTA cards */}
-            <div className="w-full space-y-3">
-                <motion.div variants={itemVariants}>
-                    <button
-                        onClick={handleShare}
-                        className="w-full race-glass-card p-4 flex items-center gap-4 transition-all duration-300 hover:border-race-accent/50 cursor-pointer"
-                        id="btn-share"
-                    >
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                            <Share2 size={20} className="text-white" />
-                        </div>
-                        <div className="text-left flex-1">
-                            <p className="font-semibold text-white text-[0.9375rem]">
-                                Share Your Score
-                            </p>
-                            <p className="text-[0.75rem] text-race-muted">
-                                Challenge friends & family
-                            </p>
-                        </div>
-                    </button>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <button
-                        onClick={handleCall}
-                        className="w-full race-glass-card p-4 flex items-center gap-4 transition-all duration-300 hover:border-race-accent/50 cursor-pointer"
-                        id="btn-call"
-                    >
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
-                            <Phone size={20} className="text-white" />
-                        </div>
-                        <div className="text-left flex-1">
-                            <p className="font-semibold text-white text-[0.9375rem]">
-                                Call Now
-                            </p>
-                            <p className="text-[0.75rem] text-race-muted">
-                                Speak to an expert immediately
-                            </p>
-                        </div>
-                    </button>
-                </motion.div>
-
+            {/* Actions */}
+            <div className="w-full flex flex-col gap-4">
                 <motion.div variants={itemVariants}>
                     <Button
                         variant="primary"
                         size="lg"
-                        className="w-full"
-                        onClick={onBookSlot}
-                        id="btn-book-slot"
+                        className="w-full py-4 bg-orange-500 hover:bg-orange-600 border-orange-400 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all"
+                        onClick={handleShare}
+                        id="btn-share"
                     >
-                        <CalendarClock size={20} />
-                        Book a Convenient Slot
+                        <Share2 size={20} />
+                        Share Your Result
                     </Button>
                 </motion.div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <motion.div variants={itemVariants}>
+                        <button
+                            onClick={handleCall}
+                            className="w-full h-14 bg-bajaj-blue/10 hover:bg-bajaj-blue/20 border-2 border-bajaj-blue/30 text-bajaj-blue font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
+                            id="btn-call"
+                        >
+                            <Phone size={18} />
+                            Call Now
+                        </button>
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                        <button
+                            onClick={onBookSlot}
+                            className="w-full h-14 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_0_rgb(180,83,9)] active:shadow-none active:translate-y-1 transition-all"
+                            id="btn-book-slot"
+                        >
+                            <CalendarClock size={18} />
+                            Book Slot
+                        </button>
+                    </motion.div>
+                </div>
             </div>
         </motion.div>
     );

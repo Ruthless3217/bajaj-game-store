@@ -13,6 +13,7 @@ import SpeedometerScore from './components/SpeedometerScore';
 import TimelineSummary from './components/TimelineSummary';
 import ConversionScreen from './components/ConversionScreen';
 import LeadForm from './components/LeadForm';
+import ThankYou from './components/ThankYou';
 
 const EVENT_TIMER_SECONDS = 5;
 
@@ -61,19 +62,30 @@ const FeedbackOverlay = memo(function FeedbackOverlay({ feedback, onContinue }) 
 });
 
 /**
- * Race progress bar showing advancement through events.
+ * Compact game status bar with thick orange progress bar.
  */
 const RaceProgress = memo(function RaceProgress({ current, total, progress }) {
     return (
-        <div className="w-full space-y-1.5">
-            <div className="flex justify-between items-center text-[0.6875rem] text-race-muted">
-                <span>Event {current} of {total}</span>
-                <span>{progress}%</span>
+        <div className="w-full space-y-2">
+            <div className="flex justify-between items-center">
+                <span className="text-[0.875rem] font-bold text-white">
+                    Event {current}/{total}
+                </span>
+                <span className="text-[0.875rem] font-bold text-white">
+                    {progress}%
+                </span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-race-surface overflow-hidden">
+            <div
+                className="w-full rounded-full overflow-hidden"
+                style={{ height: '14px', backgroundColor: 'rgba(255,255,255,0.08)' }}
+            >
                 <div
-                    className="h-full rounded-full bg-gradient-to-r from-bajaj-blue to-race-accent transition-all duration-500 ease-out"
-                    style={{ width: `${progress}%` }}
+                    className="h-full rounded-full transition-all duration-500 ease-out"
+                    style={{
+                        width: `${progress}%`,
+                        background: 'linear-gradient(90deg, #FF8C00 0%, #FF6600 100%)',
+                        boxShadow: '0 0 12px rgba(255, 140, 0, 0.4)',
+                    }}
                 />
             </div>
         </div>
@@ -102,6 +114,7 @@ const LifeMilestoneRacePage = memo(function LifeMilestoneRacePage() {
         finalScore,
         riskGaps,
         progressPercent,
+        userName,
         startGame,
         selectStage,
         makeDecision,
@@ -111,6 +124,7 @@ const LifeMilestoneRacePage = memo(function LifeMilestoneRacePage() {
         showTimeline,
         showConversion,
         showLeadForm,
+        showThankYou,
         restartGame,
     } = engine;
 
@@ -126,11 +140,9 @@ const LifeMilestoneRacePage = memo(function LifeMilestoneRacePage() {
         return LIFE_STAGES.find((s) => s.id === currentEvent.stage) ?? null;
     }, [currentEvent]);
 
-    const handleLeadSuccess = useCallback(() => {
-        // In a full implementation, this could navigate to a thank-you state.
-        // For now, restart the game.
-        restartGame();
-    }, [restartGame]);
+    const handleLeadSuccess = useCallback((formData) => {
+        showThankYou(formData?.name);
+    }, [showThankYou]);
 
     const renderPhase = () => {
         switch (phase) {
@@ -142,7 +154,7 @@ const LifeMilestoneRacePage = memo(function LifeMilestoneRacePage() {
 
             case GAME_PHASES.RACING:
                 return (
-                    <div key="racing" className="w-full flex flex-col gap-5 animate-fade-in">
+                    <div key="racing" className="w-full flex flex-col gap-6 animate-fade-in" style={{ padding: '0.5rem 0' }}>
                         <RaceProgress
                             current={currentEventIndex + 1}
                             total={eventQueue.length}
@@ -231,6 +243,14 @@ const LifeMilestoneRacePage = memo(function LifeMilestoneRacePage() {
                         category={protectionCategory}
                         riskGaps={riskGaps}
                         onSuccess={handleLeadSuccess}
+                    />
+                );
+
+            case GAME_PHASES.THANK_YOU:
+                return (
+                    <ThankYou
+                        key="thank-you"
+                        name={userName}
                     />
                 );
 

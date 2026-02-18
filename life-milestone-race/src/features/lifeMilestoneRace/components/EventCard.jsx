@@ -2,7 +2,6 @@ import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
-import Card from '../../../components/ui/Card';
 import { getSeverityLabel } from '../utils/severityImpact';
 
 const cardVariants = {
@@ -22,12 +21,32 @@ const cardVariants = {
 };
 
 /**
- * Event card displaying the current risk event.
+ * Hero-style event card — dramatic, game challenge feel.
+ * Slightly lighter blue bg, 24px corners, soft shadow, big text.
  */
 const EventCard = memo(function EventCard({ event, stageLabel, stageEmoji }) {
     if (!event) return null;
 
     const severityLabel = getSeverityLabel(event.severity);
+
+    // Severity color mapping for the pill
+    const severityStyle = {
+        high: {
+            bg: '#FF8C00',
+            text: '#fff',
+            glow: 'rgba(255, 140, 0, 0.4)',
+        },
+        medium: {
+            bg: 'rgba(245, 158, 11, 0.2)',
+            text: '#F59E0B',
+            glow: 'none',
+        },
+        moderate: {
+            bg: 'rgba(59, 130, 246, 0.2)',
+            text: '#60A5FA',
+            glow: 'none',
+        },
+    }[event.severity] || { bg: 'rgba(255,255,255,0.1)', text: '#fff', glow: 'none' };
 
     return (
         <motion.div
@@ -38,28 +57,47 @@ const EventCard = memo(function EventCard({ event, stageLabel, stageEmoji }) {
             exit="exit"
             className="w-full"
         >
-            <Card padding="lg" className="space-y-4">
-                {/* Stage badge */}
-                <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-race-surface text-[0.75rem] font-medium text-slate-300">
-                        {stageEmoji} {stageLabel}
-                    </span>
-                    <span className={`severity-badge severity-${event.severity}`}>
-                        <AlertTriangle size={12} className="mr-1" />
+            <div
+                className="w-full text-center space-y-5"
+                style={{
+                    background: 'linear-gradient(180deg, rgba(30, 42, 69, 0.95) 0%, rgba(19, 27, 46, 0.9) 100%)',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    padding: '2rem 1.5rem',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                }}
+            >
+                {/* Severity tag — orange pill with icon for critical */}
+                <div className="flex justify-center">
+                    <span
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[0.8125rem] font-black uppercase tracking-wider"
+                        style={{
+                            backgroundColor: severityStyle.bg,
+                            color: severityStyle.text,
+                            boxShadow: severityStyle.glow !== 'none' ? `0 0 12px ${severityStyle.glow}` : undefined,
+                        }}
+                    >
+                        <AlertTriangle size={14} />
                         {severityLabel}
                     </span>
                 </div>
 
-                {/* Event title */}
-                <h3 className="race-subheading text-[1.25rem] text-white leading-tight">
+                {/* Event title — large, bold, centered */}
+                <h3
+                    className="font-black text-white leading-tight"
+                    style={{ fontSize: '1.5rem', letterSpacing: '-0.02em' }}
+                >
                     {event.title}
                 </h3>
 
-                {/* Description */}
-                <p className="text-[0.875rem] text-race-muted leading-relaxed">
+                {/* Description — 18px minimum */}
+                <p
+                    className="text-white/70 leading-relaxed max-w-xs mx-auto"
+                    style={{ fontSize: '1.0625rem' }}
+                >
                     {event.description}
                 </p>
-            </Card>
+            </div>
         </motion.div>
     );
 });
