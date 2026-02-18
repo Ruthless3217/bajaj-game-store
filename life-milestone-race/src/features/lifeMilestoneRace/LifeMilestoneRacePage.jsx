@@ -260,7 +260,7 @@ const LifeMilestoneRacePage = memo(function LifeMilestoneRacePage() {
     };
 
     return (
-        <RaceLayout>
+        <RaceLayout fullScreen={phase === GAME_PHASES.INTRO}>
             <AnimatePresence mode="wait">
                 {renderPhase()}
             </AnimatePresence>
