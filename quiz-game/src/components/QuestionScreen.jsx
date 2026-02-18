@@ -22,7 +22,7 @@ const QuestionScreen = ({ question, currentQuestion, totalQuestions, onAnswerSel
 
                 {/* Question Text Area */}
                 <div className="bg-white border-l-8 border-brand-orange py-6 px-6">
-                    <h2 className="text-xl sm:text-2xl font-black text-brand-blue leading-tight uppercase">
+                    <h2 className="text-xl sm:text-2xl font-black text-brand-blue leading-tight">
                         {question.question}
                     </h2>
                 </div>
@@ -50,7 +50,7 @@ const QuestionScreen = ({ question, currentQuestion, totalQuestions, onAnswerSel
                             `}>
                                 {String.fromCharCode(65 + index)}
                             </span>
-                            <span className="flex-1 text-left font-bold text-sm sm:text-base uppercase tracking-tight text-white line-clamp-2 overflow-hidden">{option}</span>
+                            <span className="flex-1 text-left font-bold text-sm sm:text-base text-white line-clamp-2 overflow-hidden">{option}</span>
                         </motion.button>
                     ))}
                 </div>
@@ -58,9 +58,6 @@ const QuestionScreen = ({ question, currentQuestion, totalQuestions, onAnswerSel
 
             {/* Bottom spacer for balance */}
             <div className="h-12 flex items-center justify-center">
-                <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest text-center">
-                    BAJAJ LIFE INSURANCE
-                </p>
             </div>
         </motion.div>
     );

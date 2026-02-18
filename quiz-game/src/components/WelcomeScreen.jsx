@@ -12,29 +12,36 @@ const WelcomeScreen = ({ onStart }) => {
     // Form state
     const [name, setName] = useState(savedName || '');
     const [phone, setPhone] = useState(savedPhone || '');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const validatePhone = (p) => /^[6-9]\d{9}$/.test(p);
-    const isValidName = name.trim().length > 0;
-    const isFormValid = isValidName && validatePhone(phone) && isTermsAccepted;
+
+    const validate = () => {
+        const newErrors = {};
+        if (!name.trim()) {
+            newErrors.name = 'Please enter your name';
+        } else if (!/^[A-Za-z\s]+$/.test(name.trim())) {
+            newErrors.name = 'Letters only';
+        }
+
+        if (!phone.trim()) {
+            newErrors.phone = 'Please enter your phone number';
+        } else if (!validatePhone(phone)) {
+            newErrors.phone = 'Invalid 10-digit number (starts 6-9)';
+        }
+
+        if (!isTermsAccepted) {
+            newErrors.terms = 'Please accept terms';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-
-        if (!isValidName) {
-            setError('Please enter your name');
-            return;
-        }
-        if (!validatePhone(phone)) {
-            setError('Please enter a valid 10-digit mobile number starting with 6–9');
-            return;
-        }
-        if (!isTermsAccepted) {
-            setError('Please accept the Terms & Conditions');
-            return;
-        }
+        if (!validate()) return;
 
         setIsSubmitting(true);
         const result = await onLeadSubmit(name, phone);
@@ -44,7 +51,7 @@ const WelcomeScreen = ({ onStart }) => {
             setIsOpen(false);
             onStart();
         } else {
-            setError(result.error || 'Something went wrong. Please try again.');
+            setErrors({ submit: result.error || 'Something went wrong. Please try again.' });
         }
     };
 
@@ -82,15 +89,15 @@ const WelcomeScreen = ({ onStart }) => {
 
             {/* Title Section */}
             <div className="text-center space-y-3 sm:space-y-4">
-                <h1 className="text-4xl font-black text-white uppercase tracking-tight">
+                <h1 className="text-4xl font-black text-white tracking-tight">
                     Life Insurance<br />GST Quiz
                 </h1>
 
                 <div className="bg-white/10 border-2 border-white/30 p-4 mx-2 text-left backdrop-blur-sm rounded-xl">
-                    <p className="text-lg text-brand-orange font-black mb-1 uppercase">
+                    <p className="text-lg text-brand-orange font-black mb-1">
                         Did you know?
                     </p>
-                    <p className="text-sm text-white font-bold leading-tight uppercase">
+                    <p className="text-sm text-white font-bold leading-tight">
                         Life insurance attracts 0% GST! Test your knowledge now.
                     </p>
                 </div>
@@ -102,7 +109,7 @@ const WelcomeScreen = ({ onStart }) => {
                     onClick={handleStartClick}
                     className="w-full game-btn-orange text-2xl py-4 shadow-[0px_6px_0px_0px_rgba(194,65,12,1)]"
                 >
-                    START GAME
+                    Start Game
                 </button>
 
             </div>
@@ -116,14 +123,14 @@ const WelcomeScreen = ({ onStart }) => {
                             <motion.div
                                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                className="bg-white/10 border-2 border-white/30 backdrop-blur-xl rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden ring-1 ring-white/20"
+                                className="bg-white/10 border-2 border-white/30 backdrop-blur-xl rounded-3xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden ring-1 ring-white/20 my-auto"
                             >
                                 {/* Decorative elements */}
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/20 rounded-full blur-3xl -mr-16 -mt-16" />
                                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -ml-16 -mb-16" />
 
-                                <Dialog.Title className="text-2xl font-black text-white text-center mb-6 uppercase tracking-tight">
-                                    WELCOME<br />
+                                <Dialog.Title className="text-2xl font-black text-white text-center mb-6 tracking-tight">
+                                    Welcome<br />
                                     <span className="text-sm opacity-70">Enter your details to start</span>
                                 </Dialog.Title>
                                 <Dialog.Description className="sr-only">
@@ -136,10 +143,16 @@ const WelcomeScreen = ({ onStart }) => {
                                         <input
                                             type="text"
                                             value={name}
-                                            onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                                setName(val);
+                                                if (!val.trim()) setErrors(prev => ({ ...prev, name: 'Please enter your name' }));
+                                                else setErrors(prev => ({ ...prev, name: null }));
+                                            }}
                                             placeholder="Enter your name"
-                                            className="w-full bg-white/10 border-2 border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 font-bold focus:outline-none focus:border-brand-orange/50 transition-colors"
+                                            className={`w-full bg-white/10 border-2 ${errors.name ? 'border-red-400' : 'border-white/20'} rounded-xl px-4 py-3 text-white placeholder:text-white/30 font-bold focus:outline-none focus:border-brand-orange/50 transition-colors`}
                                         />
+                                        {errors.name && <p className="text-red-400 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">{errors.name}</p>}
                                     </div>
 
                                     <div className="space-y-1.5">
@@ -147,45 +160,59 @@ const WelcomeScreen = ({ onStart }) => {
                                         <input
                                             type="tel"
                                             value={phone}
-                                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                setPhone(val);
+                                                if (!val.trim()) setErrors(prev => ({ ...prev, phone: 'Please enter your phone number' }));
+                                                else if (val.length > 0 && !/^[6-9]/.test(val)) setErrors(prev => ({ ...prev, phone: 'Must start with 6-9' }));
+                                                else if (val.length > 0 && val.length < 10) setErrors(prev => ({ ...prev, phone: 'Enter 10 digits' }));
+                                                else setErrors(prev => ({ ...prev, phone: null }));
+                                            }}
                                             placeholder="10-digit mobile number"
-                                            className="w-full bg-white/10 border-2 border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 font-bold focus:outline-none focus:border-brand-orange/50 transition-colors"
+                                            className={`w-full bg-white/10 border-2 ${errors.phone ? 'border-red-400' : 'border-white/20'} rounded-xl px-4 py-3 text-white placeholder:text-white/30 font-bold focus:outline-none focus:border-brand-orange/50 transition-colors`}
                                         />
+                                        {errors.phone && <p className="text-red-400 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">{errors.phone}</p>}
                                     </div>
 
-                                    <div className="flex items-start gap-3 group cursor-pointer" onClick={() => setIsTermsAccepted(!isTermsAccepted)}>
-                                        <div className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isTermsAccepted ? 'bg-brand-orange border-brand-orange' : 'border-white/30 bg-white/5'}`}>
-                                            {isTermsAccepted && <ShieldCheck className="w-4 h-4 text-white" />}
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-3 group cursor-pointer" onClick={() => {
+                                            setIsTermsAccepted(!isTermsAccepted);
+                                            setErrors(prev => ({ ...prev, terms: null }));
+                                        }}>
+                                            <div className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isTermsAccepted ? 'bg-brand-orange border-brand-orange' : 'border-white/30 bg-white/5'}`}>
+                                                {isTermsAccepted && <ShieldCheck className="w-4 h-4 text-white" />}
+                                            </div>
+                                            <div className="text-[11px] text-white/80 font-bold leading-tight uppercase">
+                                                I accept the{' '}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setIsTermsOpen(true);
+                                                    }}
+                                                    className="text-brand-orange hover:underline decoration-2"
+                                                >
+                                                    Terms & Conditions
+                                                </button>
+                                                {' '}and acknowledge the privacy policy.
+                                            </div>
                                         </div>
-                                        <div className="text-[11px] text-white/80 font-bold leading-tight uppercase">
-                                            I accept the{' '}
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setIsTermsOpen(true);
-                                                }}
-                                                className="text-brand-orange hover:underline decoration-2"
-                                            >
-                                                Terms & Conditions
-                                            </button>
-                                            {' '}and acknowledge the privacy policy.
-                                        </div>
+                                        {errors.terms && <p className="text-red-400 text-[10px] font-black uppercase tracking-wider ml-1">{errors.terms}</p>}
                                     </div>
 
-                                    {error && (
+                                    {errors.submit && (
                                         <motion.p
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             className="text-red-400 text-xs font-black text-center uppercase"
                                         >
-                                            {error}
+                                            {errors.submit}
                                         </motion.p>
                                     )}
 
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting || !isFormValid}
+                                        disabled={isSubmitting}
                                         className="w-full game-btn-orange text-2xl py-3.5 shadow-[0px_4px_0px_0px_rgba(194,65,12,1)] disabled:opacity-50 disabled:translate-y-1 disabled:shadow-none transition-all"
                                     >
                                         {isSubmitting ? 'PROCESSING...' : "LET'S GO!"}
@@ -194,6 +221,7 @@ const WelcomeScreen = ({ onStart }) => {
                             </motion.div>
                         </div>
                     </Dialog.Content>
+
                 </Dialog.Portal>
             </Dialog.Root>
 

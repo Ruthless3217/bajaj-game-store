@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const FeedbackScreen = ({ isCorrect, explanation, onNext }) => {
     useEffect(() => {
-        const duration = 4000;
+        const duration = 10000;
         const timer = setTimeout(() => {
             onNext();
         }, duration);
@@ -44,7 +44,7 @@ const FeedbackScreen = ({ isCorrect, explanation, onNext }) => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className={`text-3xl font-black uppercase tracking-widest mb-4 ${isCorrect ? 'text-brand-blue' : 'text-brand-orange'
+                            className={`text-3xl font-black tracking-widest mb-4 ${isCorrect ? 'text-brand-blue' : 'text-brand-orange'
                                 }`}
                         >
                             {isCorrect ? 'Correct!' : "Incorrect!"}
@@ -55,10 +55,17 @@ const FeedbackScreen = ({ isCorrect, explanation, onNext }) => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="text-gray-900 text-sm font-bold leading-relaxed mb-6 bg-gray-50 p-4 border-2 border-gray-100 uppercase"
+                            className="text-gray-900 text-sm font-bold leading-relaxed mb-6 bg-gray-50 p-4 border-2 border-gray-100"
                         >
                             {explanation}
                         </motion.p>
+
+                        <button
+                            onClick={onNext}
+                            className={`w-full mb-6 font-black py-3 border-2 transition-all active:scale-95 ${isCorrect ? 'bg-brand-blue/10 border-brand-blue text-brand-blue' : 'bg-brand-orange/10 border-brand-orange text-brand-orange'}`}
+                        >
+                            Next
+                        </button>
 
                         {/* Progress Bar (Sharp) */}
                         <div className="w-full bg-gray-100 h-3 overflow-hidden border border-gray-200">
@@ -66,7 +73,7 @@ const FeedbackScreen = ({ isCorrect, explanation, onNext }) => {
                                 className={`h-full ${isCorrect ? 'bg-brand-blue' : 'bg-brand-orange'}`}
                                 initial={{ width: "0%" }}
                                 animate={{ width: "100%" }}
-                                transition={{ duration: 4, ease: "linear" }}
+                                transition={{ duration: 10, ease: "linear" }}
                             />
                         </div>
                     </div>

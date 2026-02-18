@@ -98,6 +98,20 @@ body,
 
 body {
     @apply text-slate-900 antialiased selection:bg-brand-orange selection:text-white;
+    /* Prevent mobile browser quirks */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Use dynamic viewport height with fallback */
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    /* Prevent pull-to-refresh and overscroll */
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    /* Safe area padding for notched devices */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    /* Prevent touch delays */
+    touch-action: manipulation;
 }
 
 /* Typography Overrides */

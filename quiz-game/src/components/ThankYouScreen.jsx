@@ -49,9 +49,6 @@ const ThankYouScreen = () => {
                         <span>RETAKE</span>
                     </div>
                 </button>
-                <p className="text-[10px] text-white/40 font-black text-center uppercase tracking-[0.2em]">
-                    Bajaj Life Insurance
-                </p>
             </div>
         </motion.div>
     );

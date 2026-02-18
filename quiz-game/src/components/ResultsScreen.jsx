@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Phone, Calendar, Clock, X, CheckCircle2, ChevronDown, Share2, ShieldCheck } from "lucide-react";
+import { Trophy, RotateCcw, Phone, Calendar, Clock, X, CheckCircle2, ChevronDown, Share2, ShieldCheck, Medal, Star, AlertCircle } from "lucide-react";
 import ScoreCard from './ScoreCard';
 import Confetti from './Confetti';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -9,6 +9,11 @@ import { useQuiz } from '../context/QuizContext';
 const ResultsScreen = ({ score, total, onRestart }) => {
     const { leadName, leadPhone, handleBookingSubmit, isTermsAccepted } = useQuiz();
     const percentage = (score / total) * 100;
+    const today = new Date().toISOString().split("T")[0];
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const maxDate = thirtyDaysFromNow.toISOString().split("T")[0];
+
     const [isBookingOpen, setIsBookingOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingTermsAccepted, setBookingTermsAccepted] = useState(isTermsAccepted);
@@ -18,7 +23,7 @@ const ResultsScreen = ({ score, total, onRestart }) => {
         date: '',
         timeSlot: ''
     });
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({});
 
     const timeSlots = [
         "10:00 AM - 12:00 PM",
@@ -53,26 +58,37 @@ const ResultsScreen = ({ score, total, onRestart }) => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+    const validate = () => {
+        const errs = {};
+        if (!bookingData.name.trim()) {
+            errs.name = "Name is required";
+        } else if (!/^[A-Za-z\s]+$/.test(bookingData.name.trim())) {
+            errs.name = "Letters only";
+        }
 
-        const selectedDate = new Date(bookingData.date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        if (!bookingData.mobile_no.trim()) {
+            errs.mobile_no = "Mobile is required";
+        } else if (!/^[6-9]\d{9}$/.test(bookingData.mobile_no)) {
+            errs.mobile_no = "Invalid 10-digit number";
+        }
 
-        if (!bookingData.date || selectedDate < today) {
-            setError('Please select a valid future date');
-            return;
+        if (!bookingData.date) {
+            errs.date = "Select a date";
         }
         if (!bookingData.timeSlot) {
-            setError('Please select a time slot');
-            return;
+            errs.timeSlot = "Select a slot";
         }
         if (!bookingTermsAccepted) {
-            setError('Please accept the Terms & Conditions');
-            return;
+            errs.terms = "Accept terms";
         }
+
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) return;
 
         setIsSubmitting(true);
         const result = await handleBookingSubmit({
@@ -84,26 +100,34 @@ const ResultsScreen = ({ score, total, onRestart }) => {
         if (result.success) {
             setIsBookingOpen(false);
         } else {
-            setError(result.error || 'Failed to book slot. Please try again.');
+            setErrors({ submit: result.error || 'Failed to book slot. Please try again.' });
         }
     };
 
     // Custom title based on score
     const getResultTitle = (currentScore) => {
-        if (currentScore === 0) return "LEARNING BEGINS";
-        if (currentScore <= 2) return "KEEP GOING";
-        if (currentScore <= 3) return "GOOD ATTEMPT";
-        if (currentScore === 4) return "WELL DONE";
-        return "OUTSTANDING";
+        if (currentScore === 0) return "Learning Begins";
+        if (currentScore <= 2) return "Keep Going";
+        if (currentScore <= 3) return "Good Attempt";
+        if (currentScore === 4) return "Well Done";
+        return "Outstanding";
     };
 
     // Custom motivational message based on score
     const getMotivationalMessage = (currentScore) => {
-        if (currentScore === 0) return "NO WORRIES — LET’S TRY AGAIN!";
-        if (currentScore <= 2) return "NOT QUITE THERE YET — YOU CAN DO BETTER!";
-        if (currentScore <= 3) return "GOOD EFFORT — YOU CAN DO BETTER!";
-        if (currentScore === 4) return "YOU’VE LEARNED IMPORTANT FINANCIAL AND INSURANCE CONCEPTS.";
-        return "EXCELLENT! YOU ARE A GST EXPERT!";
+        if (currentScore === 0) return "No worries — Let’s try again!";
+        if (currentScore <= 2) return "Not quite there yet — You can do better!";
+        if (currentScore <= 3) return "Good effort — You can do better!";
+        if (currentScore === 4) return "You’ve learned important financial and insurance concepts.";
+        return "Excellent! You are a GST expert!";
+    };
+
+    // Dynamic achievement icon
+    const getAchievementIcon = (currentScore) => {
+        if (currentScore === 0) return <AlertCircle className="w-10 h-10 text-brand-orange" strokeWidth={1.5} />;
+        if (currentScore <= 2) return <Star className="w-10 h-10 text-brand-orange" strokeWidth={1.5} />;
+        if (currentScore <= 4) return <Medal className="w-10 h-10 text-brand-orange" strokeWidth={1.5} />;
+        return <Trophy className="w-10 h-10 text-brand-orange" strokeWidth={1.5} />;
     };
 
     return (
@@ -125,23 +149,23 @@ const ResultsScreen = ({ score, total, onRestart }) => {
 
             <div className="flex-1 flex flex-col justify-center space-y-4">
                 <div className="flex justify-center pt-0 flex-col items-center">
-                    <p className="text-white font-black text-sm uppercase tracking-widest mb-4">
-                        HI {leadName ? leadName.toUpperCase() : 'FRIEND'}
+                    <p className="text-white font-bold text-2xl mb-4">
+                        Hi <span className="text-brand-orange font-black">{leadName ? leadName : 'Friend'}</span>
                     </p>
                     <motion.div
                         animate={{ rotate: [0, -5, 5, -5, 5, 0] }}
                         transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                         className="p-2 bg-white border-4 border-brand-orange shadow-sm rounded-none"
                     >
-                        <Trophy className="w-10 h-10 text-brand-orange" strokeWidth={1.5} />
+                        {getAchievementIcon(score)}
                     </motion.div>
                 </div>
 
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tight leading-none">
+                    <h2 className="text-3xl font-black text-white tracking-tight leading-none">
                         {getResultTitle(score)}
                     </h2>
-                    <div className="bg-brand-orange text-white text-[10px] font-black py-1.5 px-4 inline-block uppercase tracking-widest shadow-sm">
+                    <div className="bg-brand-orange text-white text-[10px] font-black py-1.5 px-4 inline-block shadow-sm">
                         {getMotivationalMessage(score)}
                     </div>
                 </div>
@@ -195,10 +219,10 @@ const ResultsScreen = ({ score, total, onRestart }) => {
 
                 <button
                     onClick={onRestart}
-                    className="py-2 text-white font-black hover:opacity-80 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-[10px]"
+                    className="w-full max-w-[400px] border-2 border-white/30 hover:bg-white/10 text-white font-black py-4 flex items-center justify-center gap-3 transition-all active:scale-95 text-lg"
                 >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>RETAKE QUIZ</span>
+                    <RotateCcw className="w-5 h-5" />
+                    <span>Retake Quiz</span>
                 </button>
             </div>
 
@@ -211,7 +235,7 @@ const ResultsScreen = ({ score, total, onRestart }) => {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                className="bg-white/10 border-2 border-white/20 backdrop-blur-2xl rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative overflow-hidden"
+                                className="bg-white/10 border-2 border-white/20 backdrop-blur-2xl rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative overflow-hidden my-auto"
                             >
                                 <button
                                     onClick={() => setIsBookingOpen(false)}
@@ -237,20 +261,34 @@ const ResultsScreen = ({ score, total, onRestart }) => {
                                             <input
                                                 type="text"
                                                 value={bookingData.name}
-                                                onChange={(e) => setBookingData(prev => ({ ...prev, name: e.target.value.replace(/[^a-zA-Z\s]/g, '') }))}
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                                    setBookingData(prev => ({ ...prev, name: val }));
+                                                    if (!val.trim()) setErrors(prev => ({ ...prev, name: "Name is required" }));
+                                                    else setErrors(prev => ({ ...prev, name: null }));
+                                                }}
                                                 placeholder="Your name"
-                                                className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors"
+                                                className={`w-full bg-white/5 border-2 ${errors.name ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors`}
                                             />
+                                            {errors.name && <p className="text-red-400 text-[9px] font-black uppercase tracking-wider ml-1 mt-1">{errors.name}</p>}
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-[10px] font-black text-white/70 uppercase tracking-widest ml-1">Phone</label>
                                             <input
                                                 type="text"
                                                 value={bookingData.mobile_no}
-                                                onChange={(e) => setBookingData(prev => ({ ...prev, mobile_no: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                    setBookingData(prev => ({ ...prev, mobile_no: val }));
+                                                    if (!val.trim()) setErrors(prev => ({ ...prev, mobile_no: "Mobile is required" }));
+                                                    else if (val.length > 0 && val.length < 10) setErrors(prev => ({ ...prev, mobile_no: "Enter 10 digits" }));
+                                                    else if (val.length === 10 && !/^[6-9]/.test(val)) setErrors(prev => ({ ...prev, mobile_no: "Must start 6-9" }));
+                                                    else setErrors(prev => ({ ...prev, mobile_no: null }));
+                                                }}
                                                 placeholder="10-digit number"
-                                                className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors"
+                                                className={`w-full bg-white/5 border-2 ${errors.mobile_no ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors`}
                                             />
+                                            {errors.mobile_no && <p className="text-red-400 text-[9px] font-black uppercase tracking-wider ml-1 mt-1">{errors.mobile_no}</p>}
                                         </div>
                                     </div>
 
@@ -261,11 +299,16 @@ const ResultsScreen = ({ score, total, onRestart }) => {
                                             <input
                                                 type="date"
                                                 value={bookingData.date}
-                                                min={new Date().toISOString().split('T')[0]}
-                                                onChange={(e) => setBookingData(prev => ({ ...prev, date: e.target.value }))}
-                                                className="w-full bg-white/10 border-2 border-white/20 rounded-xl pl-11 pr-4 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors [color-scheme:dark]"
+                                                min={today}
+                                                max={maxDate}
+                                                onChange={(e) => {
+                                                    setBookingData(prev => ({ ...prev, date: e.target.value }));
+                                                    setErrors(prev => ({ ...prev, date: null }));
+                                                }}
+                                                className={`w-full bg-white/10 border-2 ${errors.date ? 'border-red-400' : 'border-white/20'} rounded-xl pl-11 pr-4 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors [color-scheme:dark]`}
                                             />
                                         </div>
+                                        {errors.date && <p className="text-red-400 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">{errors.date}</p>}
                                     </div>
 
                                     <div className="space-y-1.5">
@@ -274,8 +317,11 @@ const ResultsScreen = ({ score, total, onRestart }) => {
                                             <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-orange" />
                                             <select
                                                 value={bookingData.timeSlot}
-                                                onChange={(e) => setBookingData(prev => ({ ...prev, timeSlot: e.target.value }))}
-                                                className="w-full bg-white/10 border-2 border-white/20 rounded-xl pl-11 pr-10 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors appearance-none"
+                                                onChange={(e) => {
+                                                    setBookingData(prev => ({ ...prev, timeSlot: e.target.value }));
+                                                    setErrors(prev => ({ ...prev, timeSlot: null }));
+                                                }}
+                                                className={`w-full bg-white/10 border-2 ${errors.timeSlot ? 'border-red-400' : 'border-white/20'} rounded-xl pl-11 pr-10 py-3 text-white font-bold focus:outline-none focus:border-brand-orange/50 transition-colors appearance-none`}
                                             >
                                                 <option value="" className="bg-zinc-900">Choose a slot</option>
                                                 {timeSlots.map(slot => (
@@ -284,19 +330,26 @@ const ResultsScreen = ({ score, total, onRestart }) => {
                                             </select>
                                             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
                                         </div>
+                                        {errors.timeSlot && <p className="text-red-400 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">{errors.timeSlot}</p>}
                                     </div>
 
-                                    <div className="flex items-start gap-3 group cursor-pointer" onClick={() => setBookingTermsAccepted(!bookingTermsAccepted)}>
-                                        <div className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${bookingTermsAccepted ? 'bg-brand-orange border-brand-orange' : 'border-white/30 bg-white/5'}`}>
-                                            {bookingTermsAccepted && <ShieldCheck className="w-4 h-4 text-white" />}
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-3 group cursor-pointer" onClick={() => {
+                                            setBookingTermsAccepted(!bookingTermsAccepted);
+                                            setErrors(prev => ({ ...prev, terms: null }));
+                                        }}>
+                                            <div className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${bookingTermsAccepted ? 'bg-brand-orange border-brand-orange' : 'border-white/30 bg-white/5'}`}>
+                                                {bookingTermsAccepted && <ShieldCheck className="w-4 h-4 text-white" />}
+                                            </div>
+                                            <div className="text-[11px] text-white/80 font-bold leading-tight uppercase">
+                                                I accept the Terms & Conditions and acknowledge the privacy policy.
+                                            </div>
                                         </div>
-                                        <div className="text-[11px] text-white/80 font-bold leading-tight uppercase">
-                                            I accept the Terms & Conditions and acknowledge the privacy policy.
-                                        </div>
+                                        {errors.terms && <p className="text-red-400 text-[10px] font-black uppercase tracking-wider ml-1">{errors.terms}</p>}
                                     </div>
 
-                                    {error && (
-                                        <p className="text-red-400 text-xs font-black text-center uppercase">{error}</p>
+                                    {errors.submit && (
+                                        <p className="text-red-400 text-xs font-black text-center uppercase">{errors.submit}</p>
                                     )}
 
                                     <button
@@ -310,6 +363,7 @@ const ResultsScreen = ({ score, total, onRestart }) => {
                             </motion.div>
                         </div>
                     </Dialog.Content>
+
                 </Dialog.Portal>
             </Dialog.Root>
         </motion.div>
