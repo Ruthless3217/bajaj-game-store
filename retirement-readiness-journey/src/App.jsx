@@ -44,7 +44,7 @@ const App = () => {
     const progress = isIntro ? 0 : isResults ? 100 : ((currentStepIndex + 1) / totalSteps) * 100;
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="min-h-screen flex flex-col">
             {/* Header / Progress */}
             {!isIntro && !isResults && (
                 <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-100">
@@ -63,7 +63,7 @@ const App = () => {
             )}
 
             {/* Main Content */}
-            <main className={`flex-1 flex flex-col max-w-[48rem] mx-auto w-full px-6 ${isResults ? 'pt-[3.4rem] pb-0' : 'py-12'}`}>
+            <main className="flex-1 flex flex-col w-full">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep.id}

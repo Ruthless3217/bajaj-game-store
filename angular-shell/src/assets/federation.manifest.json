@@ -28,7 +28,7 @@
     ]
   },
   "quiz-game": {
-    "remoteEntry": "assets/games/quiz-game/index.js",
+    "remoteEntry": "/assets/games/quiz-game/index.js",
     "exposedModule": "./GameEntry",
     "type": "react",
     "displayName": "Quiz Challenge",

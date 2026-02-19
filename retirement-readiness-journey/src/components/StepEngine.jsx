@@ -12,7 +12,7 @@ const StepEngine = ({ step, selections, onSelect }) => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[48rem] mx-auto w-full px-6 py-12">
             <div className="space-y-2">
                 <h2 className="text-[1.75rem] font-bold text-slate-900">{step.title}</h2>
                 <p className="text-slate-500 text-[1rem]">{step.description}</p>

@@ -1,3 +1,7 @@
+
+
+
+
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -67,40 +71,23 @@ const Intro = ({ onStart, setUserInfo, userInfo }) => {
     };
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in duration-700">
-            <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.6, type: "spring" }}
-                className="w-[12rem] h-[12rem] bg-primary-50 rounded-full flex items-center justify-center p-8"
-            >
-                <div className="w-full h-full bg-primary-500 rounded-full flex items-center justify-center text-[4rem] shadow-xl shadow-primary-500/30">
-                    🎯
-                </div>
-            </motion.div>
-
-            <div className="space-y-4 max-w-[32rem]">
-                <h1 className="text-[2.5rem] font-extrabold text-slate-900 leading-tight">
-                    Discover Your <br />
-                    <span className="text-primary-500 underline decoration-accent-orange decoration-4 underline-offset-8">
-                        Retirement Readiness
-                    </span>
-                </h1>
-                <p className="text-[1.125rem] text-slate-500">
-                    Embark on a fun, interactive journey to see how prepared you are for your future self. It only takes 2 minutes!
-                </p>
-            </div>
-
-            <div className="w-full max-w-[20rem] pt-8">
+        <div
+            className="flex-1 flex flex-col items-center justify-end text-center animate-in fade-in duration-700"
+            style={{
+                backgroundImage: `url('./assests/Intro.png')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                minHeight: '100vh',
+            }}
+        >
+            <div className="w-full flex justify-center pb-12">
                 <Button
                     onClick={handleStartClick}
-                    className="w-full h-[4rem] text-[1.125rem] bg-primary-500 hover:bg-primary-600 shadow-xl shadow-primary-500/40"
+                    className="px-12 h-[4rem] text-[1.25rem] font-extrabold bg-[#0066B2] hover:bg-[#005596] text-white shadow-2xl rounded-full tracking-wide"
                 >
-                    BEGIN ASSESSMENT
+                    Start Now
                 </Button>
-                <p className="mt-4 text-[0.875rem] text-slate-400">
-                    No credit card required • Instant results
-                </p>
             </div>
 
             {/* Initial Lead Popup */}
