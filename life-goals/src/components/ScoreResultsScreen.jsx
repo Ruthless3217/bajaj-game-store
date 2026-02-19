@@ -8,6 +8,11 @@ import Speedometer from './Speedometer';
 import { submitToLMS } from '../utils/api';
 
 const ScoreResultsScreen = ({ score, userName, userPhone, onBookSlot, onRestart }) => {
+    const today = new Date().toISOString().split("T")[0];
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const maxDate = thirtyDaysFromNow.toISOString().split("T")[0];
+
     const [formData, setFormData] = useState({ name: userName || '', mobile: userPhone || '', date: '', time: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
@@ -171,19 +176,18 @@ const ScoreResultsScreen = ({ score, userName, userPhone, onBookSlot, onRestart 
                 </motion.div>
 
                 {/* Restart Option */}
-                <div className="shrink-0 text-center pb-2">
+                <div className="shrink-0 text-center pb-4">
                     <button
                         onClick={onRestart}
-                        className="text-blue-100 hover:text-white text-[11px] sm:text-sm font-black uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2 mx-auto drop-shadow-md"
+                        className="text-blue-100 hover:text-white text-sm sm:text-lg font-black uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-3 mx-auto drop-shadow-md py-4 px-8 border-2 border-white/20 bg-white/5 hover:bg-white/10 rounded-xl"
                     >
-                        <RotateCcw className="w-4 h-4" /> Retake Quiz
+                        <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" /> Retake Quiz
                     </button>
                 </div>
             </div>
 
-            {/* Booking Modal */}
             {showBooking && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -203,8 +207,17 @@ const ScoreResultsScreen = ({ score, userName, userPhone, onBookSlot, onRestart 
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Your Name</label>
                                 <Input
-                                    value={formData.name} onChange={e => updateField('name', e.target.value)}
-                                    className="bg-slate-50 h-11 border-2 border-slate-100 text-slate-800 placeholder:text-slate-300 focus-visible:ring-blue-100 text-sm font-bold px-4"
+                                    value={formData.name}
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/[^A-Za-z\s]/g, '');
+                                        updateField('name', val);
+                                        if (!val.trim()) {
+                                            setErrors(prev => ({ ...p, name: "Name is required" }));
+                                        } else {
+                                            setErrors(prev => ({ ...p, name: null }));
+                                        }
+                                    }}
+                                    className={`bg-slate-50 h-11 border-2 ${errors.name ? 'border-red-400' : 'border-slate-100'} text-slate-800 placeholder:text-slate-300 focus-visible:ring-blue-100 text-sm font-bold px-4`}
                                     placeholder="Full Name"
                                 />
                                 {errors.name && <span className="text-[10px] text-red-500 ml-1 font-black uppercase tracking-wider">{errors.name}</span>}
@@ -216,9 +229,19 @@ const ScoreResultsScreen = ({ score, userName, userPhone, onBookSlot, onRestart 
                                     onChange={e => {
                                         const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                                         updateField('mobile', val);
+
+                                        if (!val.trim()) {
+                                            setErrors(p => ({ ...p, mobile: "Mobile is required" }));
+                                        } else if (val.length > 0 && !/^[6-9]/.test(val)) {
+                                            setErrors(p => ({ ...p, mobile: "Must start with 6-9" }));
+                                        } else if (val.length > 0 && val.length < 10) {
+                                            setErrors(p => ({ ...p, mobile: "Enter 10 digits" }));
+                                        } else {
+                                            setErrors(p => ({ ...p, mobile: null }));
+                                        }
                                     }}
                                     type="tel"
-                                    className="bg-slate-50 h-11 border-2 border-slate-100 text-slate-800 placeholder:text-slate-300 focus-visible:ring-blue-100 text-sm font-bold px-4"
+                                    className={`bg-slate-50 h-11 border-2 ${errors.mobile ? 'border-red-400' : 'border-slate-100'} text-slate-800 placeholder:text-slate-300 focus-visible:ring-blue-100 text-sm font-bold px-4`}
                                     placeholder="9876543210"
                                 />
                                 {errors.mobile && <span className="text-[10px] text-red-500 ml-1 font-black uppercase tracking-wider">{errors.mobile}</span>}
@@ -228,9 +251,10 @@ const ScoreResultsScreen = ({ score, userName, userPhone, onBookSlot, onRestart 
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Date</label>
                                     <Input
                                         type="date"
-                                        min={new Date().toISOString().split("T")[0]}
+                                        min={today}
+                                        max={maxDate}
                                         value={formData.date} onChange={e => updateField('date', e.target.value)}
-                                        className="bg-slate-50 h-11 border-2 border-slate-100 text-slate-800 placeholder:text-slate-300 focus-visible:ring-blue-100 text-xs font-bold px-4"
+                                        className={`bg-slate-50 h-11 border-2 ${errors.date ? 'border-red-400' : 'border-slate-100'} text-slate-800 placeholder:text-slate-300 focus-visible:ring-blue-100 text-xs font-bold px-4`}
                                     />
                                     {errors.date && <span className="text-[10px] text-red-500 ml-1 font-black uppercase tracking-wider">{errors.date}</span>}
                                 </div>

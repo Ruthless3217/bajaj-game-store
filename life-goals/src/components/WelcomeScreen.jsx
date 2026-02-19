@@ -56,7 +56,7 @@ const WelcomeScreen = ({
     const [showNamePopup, setShowNamePopup] = useState(false);
     const [userName, setUserName] = useState('');
     const [phone, setPhone] = useState('');
-    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(true);
     const [errors, setErrors] = useState({});
 
     const handleStartClick = () => {
@@ -85,15 +85,6 @@ const WelcomeScreen = ({
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            return;
-        }
-
-        if (phone === lastSubmittedPhone) {
-            setSuccessMessage('Welcome back! You are already registered.');
-            setShowSuccessToast(true);
-            setTimeout(() => {
-                onStart({ name: userName.trim(), phone });
-            }, 1000);
             return;
         }
 
@@ -332,7 +323,7 @@ const WelcomeScreen = ({
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="relative bg-white shadow-2xl w-full max-w-[320px] min-[375px]:max-w-[340px] p-5 min-[375px]:p-6 border-[4px] sm:border-[6px] border-[#0066B2]"
+                            className="relative bg-white shadow-2xl w-full max-w-[320px] min-[375px]:max-w-[340px] p-5 min-[375px]:p-6 border-[4px] sm:border-[6px] border-[#0066B2] my-auto"
                         >
                             <button
                                 onClick={() => setShowNamePopup(false)}
@@ -359,15 +350,23 @@ const WelcomeScreen = ({
                                         type="text"
                                         value={userName}
                                         onChange={(e) => {
-                                            setUserName(e.target.value);
-                                            setErrors(prev => ({ ...prev, name: null }));
+                                            // Allow only letters and spaces, remove everything else
+                                            const val = e.target.value.replace(/[^A-Za-z\s]/g, '');
+                                            setUserName(val);
+
+                                            // Real-time validation
+                                            if (!val.trim()) {
+                                                setErrors(prev => ({ ...prev, name: 'Please enter your name' }));
+                                            } else {
+                                                setErrors(prev => ({ ...prev, name: null }));
+                                            }
                                         }}
                                         placeholder="Full Name"
                                         className={`w-full px-3 py-2.5 min-[375px]:px-4 min-[375px]:py-3 sm:py-4 border-4 ${errors.name ? 'border-red-400' : 'border-slate-100'} focus:border-[#0066B2] focus:outline-none focus:ring-4 focus:ring-[#0066B2]/10 text-slate-800 font-bold text-sm min-[375px]:text-base sm:text-lg transition-all`}
                                         autoFocus
                                     />
                                     {errors.name && (
-                                        <p className="text-red-500 text-[9px] min-[375px]:text-[10px] font-black uppercase tracking-wider ml-1">{errors.name}</p>
+                                        <p className="text-red-500 text-[10px] min-[375px]:text-[11px] font-black uppercase tracking-wider ml-1 mt-1 leading-tight">{errors.name}</p>
                                     )}
                                 </div>
 
@@ -382,13 +381,25 @@ const WelcomeScreen = ({
                                         onChange={(e) => {
                                             const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                                             setPhone(val);
-                                            setErrors(prev => ({ ...prev, phone: null }));
+
+                                            // Real-time validation
+                                            if (!val.trim()) {
+                                                setErrors(prev => ({ ...prev, phone: 'Please enter your phone number' }));
+                                            } else if (val.length > 0 && !/^[6-9]/.test(val)) {
+                                                setErrors(prev => ({ ...prev, phone: 'Phone number must start with 6-9' }));
+                                            } else if (val.length > 0 && val.length < 10) {
+                                                setErrors(prev => ({ ...prev, phone: 'Please enter 10 digits' }));
+                                            } else if (val.length === 10 && !isValidPhone(val)) {
+                                                setErrors(prev => ({ ...prev, phone: 'Please enter a valid 10-digit number' }));
+                                            } else {
+                                                setErrors(prev => ({ ...prev, phone: null }));
+                                            }
                                         }}
                                         placeholder="9876543210"
                                         className={`w-full px-3 py-2.5 min-[375px]:px-4 min-[375px]:py-3 sm:py-4 border-4 ${errors.phone ? 'border-red-400' : 'border-slate-100'} focus:border-[#0066B2] focus:outline-none focus:ring-4 focus:ring-[#0066B2]/10 text-slate-800 font-bold text-sm min-[375px]:text-base sm:text-lg transition-all`}
                                     />
                                     {errors.phone && (
-                                        <p className="text-red-500 text-[9px] min-[375px]:text-[10px] font-black uppercase tracking-wider ml-1">{errors.phone}</p>
+                                        <p className="text-red-500 text-[10px] min-[375px]:text-[11px] font-black uppercase tracking-wider ml-1 mt-1 leading-tight">{errors.phone}</p>
                                     )}
                                 </div>
 
@@ -431,7 +442,7 @@ const WelcomeScreen = ({
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 };
 

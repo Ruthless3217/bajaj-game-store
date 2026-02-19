@@ -8,7 +8,7 @@ const SuccessToast = ({ message, onClose }) => {
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -50 }}
-                className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4"
+                className="absolute top-4 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4"
             >
                 <div className="bg-green-50 border-2 border-green-500 shadow-lg p-4 flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />

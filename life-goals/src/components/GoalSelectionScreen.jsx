@@ -1,9 +1,10 @@
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
 import { lifeGoals } from '../data/lifeGoals';
 import {
     GraduationCap, Palmtree, Castle, Check,
-    Rocket, Globe, Car, Wallet, HeartPulse, HeartHandshake
+    Rocket, Globe, Car, Wallet, HeartPulse, HeartHandshake,
+    ChevronDown
 } from "lucide-react";
 
 const iconMap = {
@@ -20,6 +21,28 @@ const iconMap = {
 
 const GoalSelectionScreen = ({ onProceed }) => {
     const [selectedGoals, setSelectedGoals] = useState([]);
+    const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+    const scrollRef = useRef(null);
+
+    // Check if scroll is needed
+    const checkScroll = () => {
+        if (scrollRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+            // Show indicator if there's more than 20px of scrollable content below
+            const isScrollable = scrollHeight > clientHeight + scrollTop + 20;
+            setShowScrollIndicator(isScrollable);
+        }
+    };
+
+    useEffect(() => {
+        // Initial check
+        const timer = setTimeout(checkScroll, 500); // Wait for animations to finish
+        window.addEventListener('resize', checkScroll);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', checkScroll);
+        };
+    }, []);
 
     const toggleGoal = (goalId) => {
         setSelectedGoals(prev => {
@@ -42,6 +65,16 @@ const GoalSelectionScreen = ({ onProceed }) => {
         if (selectedGoals.length === 3) {
             const goals = lifeGoals.filter(g => selectedGoals.includes(g.id));
             onProceed(goals);
+        }
+    };
+
+    const scrollToBottom = (e) => {
+        e.stopPropagation();
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
         }
     };
 
@@ -94,11 +127,15 @@ const GoalSelectionScreen = ({ onProceed }) => {
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="flex-1 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col mb-2 sm:mb-4 border-4 border-white/20 backdrop-blur-sm"
+                    className="flex-1 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col mb-2 sm:mb-4 border-4 border-white/20 backdrop-blur-sm relative"
                 >
 
                     {/* Scrollable Goals Grid */}
-                    <div className="flex-1 overflow-y-auto p-3 sm:p-4 custom-scrollbar">
+                    <div
+                        ref={scrollRef}
+                        onScroll={checkScroll}
+                        className="flex-1 overflow-y-auto p-3 sm:p-4 custom-scrollbar"
+                    >
                         <div className="grid grid-cols-2 gap-3 sm:gap-4">
                             {lifeGoals.map((goal, index) => {
                                 const IconComponent = iconMap[goal.icon];
@@ -141,6 +178,27 @@ const GoalSelectionScreen = ({ onProceed }) => {
                             })}
                         </div>
                     </div>
+
+                    {/* Scroll Indicator Arrow */}
+                    <AnimatePresence>
+                        {showScrollIndicator && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 cursor-pointer"
+                                onClick={scrollToBottom}
+                            >
+                                <motion.div
+                                    animate={{ y: [0, 8, 0] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                    className="bg-[#FF8C00] p-1.5 rounded-full shadow-[0_0_20px_rgba(255,140,0,0.5)] border-2 border-white hover:bg-[#FF7000] transition-colors active:scale-95"
+                                >
+                                    <ChevronDown className="w-6 h-6 text-white" strokeWidth={4} />
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
 
                 {/* Footer Button */}

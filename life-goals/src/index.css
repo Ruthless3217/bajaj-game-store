@@ -41,52 +41,36 @@
 
 @layer components {
 
-    /* Responsive Container for the Quiz App */
+    /* Fixed Resolution Container Support */
     .quiz-container {
-        @apply w-full h-[100dvh] flex items-center justify-center p-2 sm:p-4;
+        @apply w-full h-full relative overflow-hidden flex items-center justify-center;
+        background: linear-gradient(180deg, #142B57 0%, #2E5590 100%);
     }
 
-    /* Standardized Ghibli Card Layout - Optimized for PC and Mobile */
     .ghibli-card {
-        @apply relative w-full h-[100dvh] flex flex-col overflow-hidden;
-        @apply bg-[#0066B2] border-slate-800;
-
-        /* Mobile first */
-        border-width: 4px;
+        @apply relative w-full h-full flex flex-col overflow-hidden;
+        @apply bg-[#0066B2];
     }
 
-    /* Small Mobile (iPhone SE, etc.) */
-    @media (max-width: 360px) {
-        .ghibli-card {
-            border-width: 3px;
-        }
-    }
-
-    /* Large Mobile / Small Tablet */
-    @media (min-width: 414px) and (max-width: 639px) {
-        .ghibli-card {
-            border-width: 6px;
-        }
-    }
-
-    /* PC / Tablet Optimization - Responsive to viewport height to avoid clipping */
-    /* PC / Tablet Optimization - Responsive to viewport height to avoid clipping */
-    @media (min-width: 640px) {
-        .ghibli-card {
-            border-width: 8px;
-            max-width: 560px;
-            height: 98vh;
-            max-height: 950px;
-            min-height: 550px;
-            margin: auto;
-        }
-    }
-
+    /* PC / Tablet Optimization - Restricted to Desktop View */
     @media (min-width: 1024px) {
+        .ghibli-card {
+            border: none;
+            max-width: 560px;
+            height: 95vh;
+            max-height: 900px;
+            min-height: 600px;
+            margin: auto;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+    }
+
+    @media (min-width: 1280px) {
         .ghibli-card {
             max-width: 600px;
         }
     }
+
 
     /* Inner Content Area - Focus on middle scroll if needed */
     .ghibli-content {
