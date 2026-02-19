@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { GamificationStoreService } from './gamification-store.service';
+import { environment } from '../../../environments/environment';
 
 // ── Interfaces ──────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ export class FederationService {
   constructor(
     private http: HttpClient,
     private store: GamificationStoreService,
-  ) { }
+  ) {}
 
   /**
    * Load the federation manifest from assets.
@@ -39,22 +40,28 @@ export class FederationService {
   async loadManifest(): Promise<void> {
     const startTime = performance.now();
     try {
-      console.log('[FederationService] 📥 Loading manifest from assets/federation.manifest.json...');
+      console.log(
+        `[FederationService] 📥 Loading manifest from ${environment.manifestUrl}...`,
+      );
       this.manifest = await firstValueFrom(
-        this.http.get<GameManifest>('assets/federation.manifest.json'),
+        this.http.get<GameManifest>(environment.manifestUrl),
       );
       const duration = performance.now() - startTime;
-      
+
       const gameCount = Object.keys(this.manifest).length;
       const popularGames = Object.entries(this.manifest)
         .filter(([_, entry]) => entry.popular)
         .map(([id, _]) => id);
-      
-      console.log(`[FederationService] ✅ Manifest loaded successfully in ${duration.toFixed(2)}ms`);
+
+      console.log(
+        `[FederationService] ✅ Manifest loaded successfully in ${duration.toFixed(2)}ms`,
+      );
       console.log(`[FederationService] 📊 Manifest Summary:`);
       console.log(`  • Total Games: ${gameCount}`);
-      console.log(`  • Popular Games: ${popularGames.length} - [${popularGames.join(', ')}]`);
-      
+      console.log(
+        `  • Popular Games: ${popularGames.length} - [${popularGames.join(', ')}]`,
+      );
+
       // Log details for each game
       console.log(`[FederationService] 📋 Game Details:`);
       Object.entries(this.manifest).forEach(([id, entry]) => {
@@ -68,7 +75,10 @@ export class FederationService {
       });
     } catch (error) {
       const duration = performance.now() - startTime;
-      console.error(`[FederationService] ❌ Failed to load manifest in ${duration.toFixed(2)}ms:`, error);
+      console.error(
+        `[FederationService] ❌ Failed to load manifest in ${duration.toFixed(2)}ms:`,
+        error,
+      );
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`[FederationService] Error Details: ${errorMsg}`);
       throw error;
@@ -81,9 +91,13 @@ export class FederationService {
   getGameManifest(gameId: string): GameManifestEntry | null {
     const entry = this.manifest?.[gameId] || null;
     if (!entry) {
-      console.warn(`[FederationService] ⚠️  No manifest entry found for game: ${gameId}`);
+      console.warn(
+        `[FederationService] ⚠️  No manifest entry found for game: ${gameId}`,
+      );
     } else {
-      console.log(`[FederationService] ✅ Retrieved manifest for game: ${gameId}`);
+      console.log(
+        `[FederationService] ✅ Retrieved manifest for game: ${gameId}`,
+      );
     }
     return entry;
   }
@@ -109,7 +123,9 @@ export class FederationService {
     // ── Lobby / manifest fallback ──
     const entry = this.getGameManifest(gameId);
     if (!entry) {
-      console.error(`[FederationService] ❌ Cannot construct game URL - no manifest entry for ${gameId}`);
+      console.error(
+        `[FederationService] ❌ Cannot construct game URL - no manifest entry for ${gameId}`,
+      );
       return null;
     }
 
@@ -131,7 +147,9 @@ export class FederationService {
    */
   getAllGames(): GameManifestEntry[] {
     if (!this.manifest) {
-      console.warn('[FederationService] ⚠️  Manifest not loaded - cannot get games');
+      console.warn(
+        '[FederationService] ⚠️  Manifest not loaded - cannot get games',
+      );
       return [];
     }
     const games = Object.entries(this.manifest).map(
@@ -141,7 +159,9 @@ export class FederationService {
           gameId: id,
         }) as GameManifestEntry,
     );
-    console.log(`[FederationService] 📋 Retrieved ${games.length} total games from manifest`);
+    console.log(
+      `[FederationService] 📋 Retrieved ${games.length} total games from manifest`,
+    );
     return games;
   }
 
@@ -150,13 +170,17 @@ export class FederationService {
    */
   getPopularGames(): string[] {
     if (!this.manifest) {
-      console.warn('[FederationService] ⚠️  Manifest not loaded - cannot get popular games');
+      console.warn(
+        '[FederationService] ⚠️  Manifest not loaded - cannot get popular games',
+      );
       return [];
     }
     const popularGames = Object.entries(this.manifest)
       .filter(([_, entry]) => entry.popular)
       .map(([id, _]) => id);
-    console.log(`[FederationService] ⭐ Found ${popularGames.length} popular games: [${popularGames.join(', ')}]`);
+    console.log(
+      `[FederationService] ⭐ Found ${popularGames.length} popular games: [${popularGames.join(', ')}]`,
+    );
     return popularGames;
   }
 
@@ -168,7 +192,9 @@ export class FederationService {
   resolveApiGameId(apiGameId: string): string {
     // If it already matches a manifest key directly, return it
     if (this.manifest?.[apiGameId]) {
-      console.log(`[FederationService] ✅ API ID "${apiGameId}" matches manifest key directly`);
+      console.log(
+        `[FederationService] ✅ API ID "${apiGameId}" matches manifest key directly`,
+      );
       return apiGameId;
     }
 
@@ -190,4 +216,3 @@ export class FederationService {
     return apiGameId;
   }
 }
-

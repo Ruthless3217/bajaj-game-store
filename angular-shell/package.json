@@ -10,7 +10,7 @@
     "test": "ng test",
     "serve": "ng serve --port 4200",
     "serve:prod": "ng serve --configuration production",
-    "preview": "http-server dist/angular-shell/browser -p 4200 -c-1 --spa"
+  "preview": "http-server dist/gamification -p 4200 -c-1 --spa"
   },
   "private": true,
   "dependencies": {

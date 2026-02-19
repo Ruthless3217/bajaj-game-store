@@ -28,7 +28,7 @@ RUN pnpm build
 FROM nginx:alpine
 
 # Copy built Shell (which includes all games)
-COPY --from=builder /app/angular-shell/dist/angular-shell/browser /usr/share/nginx/html
+COPY --from=builder /app/angular-shell/dist/gamification /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
