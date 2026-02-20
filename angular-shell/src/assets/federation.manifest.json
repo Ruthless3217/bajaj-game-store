@@ -66,5 +66,23 @@
     "popular": true,
     "gameId": "GAME_006",
     "assets": []
+  },
+  "retirement-sudoku": {
+    "remoteEntry": "assets/games/retirement-sudoku/index.js",
+    "exposedModule": "./GameEntry",
+    "type": "react",
+    "displayName": "Retirement Sudoku",
+    "popular": true,
+    "gameId": "GAME_007",
+    "assets": []
+  },
+  "financial-tetris": {
+    "remoteEntry": "assets/games/financial-tetris/index.js",
+    "exposedModule": "./GameEntry",
+    "type": "react",
+    "displayName": "Financial Tetris",
+    "popular": true,
+    "gameId": "GAME_008",
+    "assets": []
   }
 }
